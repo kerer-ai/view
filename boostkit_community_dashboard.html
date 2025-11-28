@@ -1,0 +1,1234 @@
+
+        <!DOCTYPE html>
+        <html lang="zh-CN">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>BoostKit社区数字化看板</title>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <style>
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background-color: #f5f7fa;
+                }
+                .dashboard-header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 2rem 0;
+                    margin-bottom: 2rem;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+                .stat-card {
+                    background: white;
+                    border-radius: 10px;
+                    padding: 1.5rem;
+                    margin-bottom: 1.5rem;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
+                .stat-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+                }
+                .stat-number {
+                    font-size: 2rem;
+                    font-weight: bold;
+                    color: #667eea;
+                }
+                .stat-label {
+                    font-size: 0.9rem;
+                    color: #6c757d;
+                    margin-top: 0.5rem;
+                }
+                .table-container {
+                    background: white;
+                    border-radius: 10px;
+                    padding: 1.5rem;
+                    margin-bottom: 2rem;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                }
+                .chart-container {
+                    background: white;
+                    border-radius: 10px;
+                    padding: 1.5rem;
+                    margin-bottom: 2rem;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                    height: 400px;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .chart-container canvas {
+                    flex: 1;
+                    max-height: calc(100% - 40px);
+                }
+                .language-badge {
+                    display: inline-block;
+                    background: #e9ecef;
+                    color: #495057;
+                    padding: 0.25rem 0.5rem;
+                    border-radius: 12px;
+                    font-size: 0.8rem;
+                    margin-right: 0.5rem;
+                    margin-bottom: 0.5rem;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="dashboard-header">
+                <div class="container">
+                    <h1 class="text-center">BoostKit社区数字化看板</h1>
+                    <p class="text-center">统计时间: 2025-11-28 11:25:46</p>
+                </div>
+            </div>
+            
+            <div class="container">
+                <!-- 整体统计概览 -->
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="stat-card text-center">
+                            <div class="stat-number">64</div>
+                            <div class="stat-label">社区项目总数</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stat-card text-center">
+                            <div class="stat-number">1402</div>
+                            <div class="stat-label">累计PR数量</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stat-card text-center">
+                            <div class="stat-number">19</div>
+                            <div class="stat-label">累计Issue数量</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stat-card text-center">
+                            <div class="stat-number">26.3%</div>
+                            <div class="stat-label">Issue处理效率</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stat-card text-center">
+                            <div class="stat-number">18.5</div>
+                            <div class="stat-label">平均分支数</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 语言分布 -->
+                <div class="chart-container">
+                    <h3>项目主要语言分布</h3>
+                    <canvas id="languageChart"></canvas>
+                </div>
+                
+                <!-- PR相关指标 -->
+                <div class="chart-container">
+                    <h3>PR处理效率</h3>
+                    <canvas id="prEfficiencyChart"></canvas>
+                </div>
+                
+                <!-- Issue处理效率 -->
+                <div class="chart-container">
+                    <h3>Issue处理效率</h3>
+                    <canvas id="issueEfficiencyChart"></canvas>
+                </div>
+                
+                <!-- 全量仓库度量指标表格 -->
+                <div class="table-container">
+                    <h3>全量仓库度量指标</h3>
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>项目名称</th>
+                                <th>主要语言</th>
+                                <th>总PR数</th>
+                                <th>已关闭PR数</th>
+                                <th>30天内关闭PR数</th>
+                                <th>超过30天未关闭PR数</th>
+                                <th>平均合并时间(小时)</th>
+                                <th>总Issue数</th>
+                                <th>已关闭Issue数</th>
+                                <th>15天内闭环Issue数</th>
+                                <th>超过30天未关闭且未更新Issue数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        <tr>
+            <td>1</td>
+            <td><a href="https://gitcode.com/boostkit/isa-l" target="_blank">isa-l</a></td>
+            <td>C</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>2</td>
+            <td><a href="https://gitcode.com/boostkit/KDADK-TOOLS" target="_blank">KDADK-TOOLS</a></td>
+            <td>Python</td>
+            <td>2</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+            <td>0.07</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>3</td>
+            <td><a href="https://gitcode.com/boostkit/QA" target="_blank">QA</a></td>
+            <td>Unknown</td>
+            <td>2</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+            <td>13.72</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>4</td>
+            <td><a href="https://gitcode.com/boostkit/protobuf" target="_blank">protobuf</a></td>
+            <td>C++</td>
+            <td>10</td>
+            <td>10</td>
+            <td>10</td>
+            <td>0</td>
+            <td>0.38</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>5</td>
+            <td><a href="https://gitcode.com/boostkit/snappy" target="_blank">snappy</a></td>
+            <td>C++</td>
+            <td>2</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+            <td>1.12</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>6</td>
+            <td><a href="https://gitcode.com/boostkit/MicroservicesBench" target="_blank">MicroservicesBench</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>7</td>
+            <td><a href="https://gitcode.com/boostkit/cmf" target="_blank">cmf</a></td>
+            <td>C</td>
+            <td>4</td>
+            <td>4</td>
+            <td>3</td>
+            <td>0</td>
+            <td>9.88</td>
+            <td>1</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>8</td>
+            <td><a href="https://gitcode.com/boostkit/ceph" target="_blank">ceph</a></td>
+            <td>C++</td>
+            <td>8</td>
+            <td>8</td>
+            <td>8</td>
+            <td>0</td>
+            <td>90.52</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>9</td>
+            <td><a href="https://gitcode.com/boostkit/ocf" target="_blank">ocf</a></td>
+            <td>C</td>
+            <td>1</td>
+            <td>1</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0.02</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>10</td>
+            <td><a href="https://gitcode.com/boostkit/mesa" target="_blank">mesa</a></td>
+            <td>C</td>
+            <td>10</td>
+            <td>7</td>
+            <td>7</td>
+            <td>3</td>
+            <td>17.17</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>11</td>
+            <td><a href="https://gitcode.com/boostkit/Kbox" target="_blank">Kbox</a></td>
+            <td>Shell</td>
+            <td>160</td>
+            <td>155</td>
+            <td>155</td>
+            <td>5</td>
+            <td>31.79</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>12</td>
+            <td><a href="https://gitcode.com/boostkit/mysql-server" target="_blank">mysql-server</a></td>
+            <td>C++</td>
+            <td>8</td>
+            <td>8</td>
+            <td>8</td>
+            <td>0</td>
+            <td>44.05</td>
+            <td>1</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>13</td>
+            <td><a href="https://gitcode.com/boostkit/3FS" target="_blank">3FS</a></td>
+            <td>C++</td>
+            <td>2</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+            <td>5.99</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>14</td>
+            <td><a href="https://gitcode.com/boostkit/vmi" target="_blank">vmi</a></td>
+            <td>C</td>
+            <td>62</td>
+            <td>58</td>
+            <td>55</td>
+            <td>4</td>
+            <td>25.33</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>15</td>
+            <td><a href="https://gitcode.com/boostkit/rocksdb" target="_blank">rocksdb</a></td>
+            <td>C++</td>
+            <td>6</td>
+            <td>5</td>
+            <td>5</td>
+            <td>1</td>
+            <td>76.88</td>
+            <td>2</td>
+            <td>2</td>
+            <td>1</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>16</td>
+            <td><a href="https://gitcode.com/boostkit/hadoop" target="_blank">hadoop</a></td>
+            <td>Java</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>17</td>
+            <td><a href="https://gitcode.com/boostkit/cloud-native" target="_blank">cloud-native</a></td>
+            <td>Go</td>
+            <td>124</td>
+            <td>123</td>
+            <td>118</td>
+            <td>1</td>
+            <td>58.96</td>
+            <td>3</td>
+            <td>3</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>18</td>
+            <td><a href="https://gitcode.com/boostkit/zstd" target="_blank">zstd</a></td>
+            <td>C</td>
+            <td>14</td>
+            <td>13</td>
+            <td>13</td>
+            <td>1</td>
+            <td>16.66</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>19</td>
+            <td><a href="https://gitcode.com/boostkit/lz4" target="_blank">lz4</a></td>
+            <td>C</td>
+            <td>4</td>
+            <td>4</td>
+            <td>4</td>
+            <td>0</td>
+            <td>2.72</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>20</td>
+            <td><a href="https://gitcode.com/boostkit/KAE" target="_blank">KAE</a></td>
+            <td>C</td>
+            <td>187</td>
+            <td>185</td>
+            <td>181</td>
+            <td>2</td>
+            <td>10.89</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>21</td>
+            <td><a href="https://gitcode.com/boostkit/hyperscan" target="_blank">hyperscan</a></td>
+            <td>C++</td>
+            <td>17</td>
+            <td>17</td>
+            <td>17</td>
+            <td>0</td>
+            <td>3.05</td>
+            <td>1</td>
+            <td>1</td>
+            <td>1</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>22</td>
+            <td><a href="https://gitcode.com/boostkit/spdk" target="_blank">spdk</a></td>
+            <td>C</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>23</td>
+            <td><a href="https://gitcode.com/boostkit/gluten" target="_blank">gluten</a></td>
+            <td>Scala</td>
+            <td>193</td>
+            <td>183</td>
+            <td>180</td>
+            <td>10</td>
+            <td>28.15</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>24</td>
+            <td><a href="https://gitcode.com/boostkit/cloud-virtual" target="_blank">cloud-virtual</a></td>
+            <td>Python</td>
+            <td>17</td>
+            <td>17</td>
+            <td>17</td>
+            <td>0</td>
+            <td>6.52</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>25</td>
+            <td><a href="https://gitcode.com/boostkit/boostkit-bigdata" target="_blank">boostkit-bigdata</a></td>
+            <td>Java</td>
+            <td>361</td>
+            <td>320</td>
+            <td>311</td>
+            <td>41</td>
+            <td>39.0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>26</td>
+            <td><a href="https://gitcode.com/boostkit/vllm_router" target="_blank">vllm_router</a></td>
+            <td>Python</td>
+            <td>3</td>
+            <td>3</td>
+            <td>2</td>
+            <td>0</td>
+            <td>0.05</td>
+            <td>1</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>27</td>
+            <td><a href="https://gitcode.com/boostkit/vllm-ops" target="_blank">vllm-ops</a></td>
+            <td>Unknown</td>
+            <td>5</td>
+            <td>5</td>
+            <td>4</td>
+            <td>0</td>
+            <td>51.07</td>
+            <td>1</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>28</td>
+            <td><a href="https://gitcode.com/boostkit/boostkit-agreements" target="_blank">boostkit-agreements</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>29</td>
+            <td><a href="https://gitcode.com/boostkit/Redis" target="_blank">Redis</a></td>
+            <td>Unknown</td>
+            <td>5</td>
+            <td>5</td>
+            <td>5</td>
+            <td>0</td>
+            <td>3.46</td>
+            <td>2</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>30</td>
+            <td><a href="https://gitcode.com/boostkit/infra" target="_blank">infra</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>31</td>
+            <td><a href="https://gitcode.com/boostkit/.gitcode" target="_blank">.gitcode</a></td>
+            <td>Unknown</td>
+            <td>1</td>
+            <td>1</td>
+            <td>1</td>
+            <td>0</td>
+            <td>1.7</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>32</td>
+            <td><a href="https://gitcode.com/boostkit/boostkit-database" target="_blank">boostkit-database</a></td>
+            <td>C</td>
+            <td>20</td>
+            <td>18</td>
+            <td>18</td>
+            <td>2</td>
+            <td>-0.12</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>33</td>
+            <td><a href="https://gitcode.com/boostkit/boost-x" target="_blank">boost-x</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>34</td>
+            <td><a href="https://gitcode.com/boostkit/waas" target="_blank">waas</a></td>
+            <td>Python</td>
+            <td>38</td>
+            <td>38</td>
+            <td>37</td>
+            <td>0</td>
+            <td>12.83</td>
+            <td>3</td>
+            <td>3</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>35</td>
+            <td><a href="https://gitcode.com/boostkit/zlib" target="_blank">zlib</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>36</td>
+            <td><a href="https://gitcode.com/boostkit/kqmalloc" target="_blank">kqmalloc</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>37</td>
+            <td><a href="https://gitcode.com/boostkit/avx2ki" target="_blank">avx2ki</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>38</td>
+            <td><a href="https://gitcode.com/boostkit/kpglibc" target="_blank">kpglibc</a></td>
+            <td>Unknown</td>
+            <td>5</td>
+            <td>5</td>
+            <td>5</td>
+            <td>0</td>
+            <td>0.31</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>39</td>
+            <td><a href="https://gitcode.com/boostkit/pytorch" target="_blank">pytorch</a></td>
+            <td>Unknown</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>40</td>
+            <td><a href="https://gitcode.com/boostkit/vision" target="_blank">vision</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>41</td>
+            <td><a href="https://gitcode.com/boostkit/opencv" target="_blank">opencv</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>42</td>
+            <td><a href="https://gitcode.com/boostkit/ffmpeg" target="_blank">ffmpeg</a></td>
+            <td>Unknown</td>
+            <td>5</td>
+            <td>5</td>
+            <td>4</td>
+            <td>0</td>
+            <td>5.17</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>43</td>
+            <td><a href="https://gitcode.com/boostkit/libavif" target="_blank">libavif</a></td>
+            <td>Unknown</td>
+            <td>4</td>
+            <td>4</td>
+            <td>4</td>
+            <td>0</td>
+            <td>5.5</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>44</td>
+            <td><a href="https://gitcode.com/boostkit/libwebp" target="_blank">libwebp</a></td>
+            <td>Unknown</td>
+            <td>4</td>
+            <td>4</td>
+            <td>4</td>
+            <td>0</td>
+            <td>5.39</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>45</td>
+            <td><a href="https://gitcode.com/boostkit/boostmedia" target="_blank">boostmedia</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>46</td>
+            <td><a href="https://gitcode.com/boostkit/boostbox" target="_blank">boostbox</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>47</td>
+            <td><a href="https://gitcode.com/boostkit/boostvirt" target="_blank">boostvirt</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>48</td>
+            <td><a href="https://gitcode.com/boostkit/postgres" target="_blank">postgres</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>49</td>
+            <td><a href="https://gitcode.com/boostkit/kovae" target="_blank">kovae</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>50</td>
+            <td><a href="https://gitcode.com/boostkit/milvus" target="_blank">milvus</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>51</td>
+            <td><a href="https://gitcode.com/boostkit/boostdb" target="_blank">boostdb</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>52</td>
+            <td><a href="https://gitcode.com/boostkit/boostsds" target="_blank">boostsds</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>53</td>
+            <td><a href="https://gitcode.com/boostkit/omnistatestore" target="_blank">omnistatestore</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>54</td>
+            <td><a href="https://gitcode.com/boostkit/omnistream" target="_blank">omnistream</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>55</td>
+            <td><a href="https://gitcode.com/boostkit/omnioperator" target="_blank">omnioperator</a></td>
+            <td>Unknown</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>56</td>
+            <td><a href="https://gitcode.com/boostkit/omniruntime" target="_blank">omniruntime</a></td>
+            <td>Unknown</td>
+            <td>5</td>
+            <td>2</td>
+            <td>2</td>
+            <td>3</td>
+            <td>13.31</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>57</td>
+            <td><a href="https://gitcode.com/boostkit/knewpfordelta" target="_blank">knewpfordelta</a></td>
+            <td>C</td>
+            <td>21</td>
+            <td>21</td>
+            <td>21</td>
+            <td>0</td>
+            <td>20.21</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>58</td>
+            <td><a href="https://gitcode.com/boostkit/boostsra" target="_blank">boostsra</a></td>
+            <td>Unknown</td>
+            <td>2</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+            <td>19.57</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>59</td>
+            <td><a href="https://gitcode.com/boostkit/kvecturbo" target="_blank">kvecturbo</a></td>
+            <td>C++</td>
+            <td>6</td>
+            <td>6</td>
+            <td>5</td>
+            <td>0</td>
+            <td>15.4</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>60</td>
+            <td><a href="https://gitcode.com/boostkit/faiss" target="_blank">faiss</a></td>
+            <td>Unknown</td>
+            <td>7</td>
+            <td>7</td>
+            <td>7</td>
+            <td>0</td>
+            <td>51.45</td>
+            <td>1</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>61</td>
+            <td><a href="https://gitcode.com/boostkit/hnswlib" target="_blank">hnswlib</a></td>
+            <td>C++</td>
+            <td>9</td>
+            <td>9</td>
+            <td>9</td>
+            <td>0</td>
+            <td>76.6</td>
+            <td>1</td>
+            <td>1</td>
+            <td>1</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>62</td>
+            <td><a href="https://gitcode.com/boostkit/tensorflow-serving" target="_blank">tensorflow-serving</a></td>
+            <td>Unknown</td>
+            <td>11</td>
+            <td>11</td>
+            <td>10</td>
+            <td>0</td>
+            <td>4.9</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>63</td>
+            <td><a href="https://gitcode.com/boostkit/tensorflow" target="_blank">tensorflow</a></td>
+            <td>Unknown</td>
+            <td>24</td>
+            <td>24</td>
+            <td>23</td>
+            <td>0</td>
+            <td>14.18</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        
+        <tr>
+            <td>64</td>
+            <td><a href="https://gitcode.com/boostkit/community" target="_blank">community</a></td>
+            <td>Unknown</td>
+            <td>32</td>
+            <td>27</td>
+            <td>26</td>
+            <td>5</td>
+            <td>11.41</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <script>
+                // 语言分布图表
+                const languageCtx = document.getElementById('languageChart').getContext('2d');
+                new Chart(languageCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['C', 'Python', 'Unknown', 'C++', 'Shell', 'Java', 'Go', 'Scala'],
+                        datasets: [{
+                            data: [11, 4, 35, 9, 1, 2, 1, 1],
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                                '#FF9F40', '#8ACB88', '#FF6B6B', '#4ECDC4', '#45B7D1'
+                            ],
+                            borderWidth: 1,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 15,
+                                    padding: 15,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + ' 个项目';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // PR效率图表
+                const prEfficiencyCtx = document.getElementById('prEfficiencyChart').getContext('2d');
+                new Chart(prEfficiencyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["boostkit-bigdata", "KAE", "gluten", "Kbox", "ocf", "cloud-native", "vmi", "mysql-server", "rocksdb", "spdk"],
+                        datasets: [
+                            {
+                                label: '30天内关闭PR数',
+                                data: [1215, 484, 180, 176, 132, 118, 86, 65, 43, 43],
+                                backgroundColor: '#4BC0C0'
+                            },
+                            {
+                                label: '超过30天未关闭PR数',
+                                data: [41, 1, 10, 3, 0, 0, 3, 0, 1, 0],
+                                backgroundColor: '#FF6384'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                // Issue效率图表
+                const issueEfficiencyCtx = document.getElementById('issueEfficiencyChart').getContext('2d');
+                new Chart(issueEfficiencyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["cloud-native", "waas", "KDADK-TOOLS", "rocksdb", "Redis", "cmf", "mysql-server", "hyperscan", "vllm_router", "vllm-ops"],
+                        datasets: [
+                            {
+                                label: '15天内闭环Issue数',
+                                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                backgroundColor: '#4BC0C0'
+                            },
+                            {
+                                label: '超过30天未关闭且未更新Issue数',
+                                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                backgroundColor: '#FF6384'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            </script>
+        <script>// 语言分布图表const languageCtx = document.getElementById('languageChart').getContext('2d');new Chart(languageCtx, {type: 'pie',data: {labels: ["C", "Python", "C++", "Shell", "Java", "Go", "Scala"],datasets: [{data: [11, 4, 9, 1, 2, 1, 1],backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FFCD56', '#C9CBCF', '#3498DB', '#2ECC71']}]},options: {responsive: true, maintainAspectRatio: false}})// PR处理效率图表const prCtx = document.getElementById('prEfficiencyChart').getContext('2d');new Chart(prCtx, {type: 'bar',data: {labels: ["\u603bPR\u6570", "30\u5929\u5185\u95ed\u73afPR\u6570"],datasets: [{label: '数量',data: [1402, 173],backgroundColor: ['#667eea', '#764ba2']}]},options: {responsive: true, maintainAspectRatio: false, scales: {y: {beginAtZero: true}}}})// Issue处理效率图表const issueCtx = document.getElementById('issueEfficiencyChart').getContext('2d');new Chart(issueCtx, {type: 'bar',data: {labels: ["\u603bIssue\u6570", "30\u5929\u5185\u95ed\u73afIssue\u6570"],datasets: [{label: '数量',data: [19, 5],backgroundColor: ['#f093fb', '#f5576c']}]},options: {responsive: true, maintainAspectRatio: false, scales: {y: {beginAtZero: true}}}})</script></body>
+        </html>
+        
